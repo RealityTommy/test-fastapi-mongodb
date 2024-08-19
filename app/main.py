@@ -3,11 +3,9 @@ from app.todo.todos import router as todos_router
 
 app = FastAPI()
 
-app.include_router(todos_router)
-
 # Server Status
 @app.get("/")
 def root():
-    return Response("Server is running.")
+    return Response(content="Server is running", status_code=200)
 
 app.include_router(todos_router)
