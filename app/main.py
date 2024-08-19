@@ -6,6 +6,6 @@ app = FastAPI()
 # Server Status
 @app.get("/")
 def root():
-    return Response(content="Server is running", status_code=200)
+    return Response(content="Hello, World", status_code=200)
 
 app.include_router(todos_router)
