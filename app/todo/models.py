@@ -4,3 +4,4 @@ class TodoModel(BaseModel):
     name: str = "Name"
     description: str = "Description"
     completed: bool = False
+    uid: str

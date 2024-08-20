@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Response
 from app.todo.models import TodoModel as Todo
-from app.todo.database import collection
 from app.todo.schemas import individual_serial, list_serial
 from bson import ObjectId
+from app.config.mongo.database import db
+from firebase_admin import auth
+
+collection = db["todo"]
 
 router = APIRouter(\
-    prefix='/todos',\
-    tags = ['todos'])
+    prefix='/mongo',\
+    tags = ['mongo'])
 
 # Get all todos
 @router.get("/")
@@ -21,12 +24,17 @@ async def get_todos():
 
 # Create a new todo
 @router.post("/")
-async def create_todo(todo: Todo):
+async def create_todo(todo: Todo, token: str):
     try:
-        collection.insert_one(dict(todo))
+        decoded_token = auth.verify_id_token(token)
 
-        return Response(content="Todo created successfully", status_code=201)
-    
+        new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, uid=decoded_token["uid"])
+        
+        if decoded_token:
+            collection.insert_one(dict(new_todo))
+
+            return Response(content="Todo created successfully", status_code=201)
+
     except Exception as e:
         return Response(content=str(e), status_code=400)
 

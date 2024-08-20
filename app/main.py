@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Response
 from app.auth.auth import router as auth_router
-from app.todo.todos import router as todos_router
+from app.user.user import router as users_router
+from app.todo.todo import router as todo_router
 
 app = FastAPI()
 
@@ -11,4 +12,6 @@ def root():
 
 app.include_router(auth_router)
 
-app.include_router(todos_router)
+app.include_router(users_router)
+
+app.include_router(todo_router)
