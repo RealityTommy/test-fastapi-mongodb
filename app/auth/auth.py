@@ -9,17 +9,21 @@ from app.auth.models import EmailPasswordModel
 from app.user.models import UserModel
 from app.config.mongo.database import db
 
+# Firebase service account key
 serviceAccountKeyFile = open("app/config/firebase/serviceAccountKey.json")
 serviceAccountKey = json.load(serviceAccountKeyFile)
 
+# Initialize Firebase
 if not firebase_admin._apps:
     cred = credentials.Certificate(serviceAccountKey)
     firebase_admin.initialize_app(cred)
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 
+# MongoDB users collection
 collection = db["users"]
 
+# Auth router
 router = APIRouter(\
     prefix="/auth",\
     tags = ["auth"])
@@ -33,14 +37,15 @@ async def signup(user_login: EmailPasswordModel, user_data: UserModel):
     try:
         user_account = auth.create_user(email=email, password=password)
         
+        # If user account is created, create user profile
         if user_account:
             user_profile = UserModel(first_name=user_data.first_name,last_name=user_data.last_name,firebase_uid=user_account.uid)
             collection.insert_one(dict(user_profile))
 
-        return Response(content=f"Sign up successful for user", status_code=201)
+        return Response(content=f"Sign up successful for {email}", status_code=201)
 
     except auth.EmailAlreadyExistsError:
-        raise HTTPException(status_code=400, detail=f"Account already exists for {user_login.email}")
+        raise HTTPException(status_code=400, detail=f"Account already exists for {email}")
 
 # Sign in
 @router.post("/signin")

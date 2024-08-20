@@ -10,8 +10,11 @@ app = FastAPI()
 def root():
     return Response(content="Hello, World", status_code=200)
 
+# Include auth routers
 app.include_router(auth_router)
 
+# Include user routers
 app.include_router(users_router)
 
+# Include todo routers
 app.include_router(todo_router)

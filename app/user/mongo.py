@@ -4,7 +4,8 @@ from app.user.schemas import individual_serial, list_serial
 from bson import ObjectId
 from app.config.mongo.database import db
 
-collection = db["users"]
+user_collection = db["users"]
+todo_collection = db["todos"]
 
 router = APIRouter(\
     prefix='/mongo',\
@@ -14,7 +15,7 @@ router = APIRouter(\
 @router.get("/")
 async def get_users():
     try:
-        users = list_serial(collection.find())
+        users = list_serial(user_collection.find())
 
         return users
     
@@ -25,7 +26,7 @@ async def get_users():
 @router.post("/")
 async def create_user(user: User):
     try:
-        collection.insert_one(dict(user))
+        user_collection.insert_one(dict(user))
 
         return Response(content="User created successfully", status_code=201)
     
@@ -36,7 +37,7 @@ async def create_user(user: User):
 @router.put("/{id}")
 async def update_user(user: User, id: str):
     try:
-        collection.update_one({"_id": ObjectId(id)}, {"$set": dict(user)})
+        user_collection.update_one({"_id": ObjectId(id)}, {"$set": dict(user)})
 
         return Response(content="User updated successfully", status_code=200)
     
@@ -47,7 +48,9 @@ async def update_user(user: User, id: str):
 @router.delete("/{id}")
 async def delete_user(id: str):
     try:
-        collection.delete_one({"_id": ObjectId(id)})
+
+
+        user_collection.delete_one({"_id": ObjectId(id)})
 
         return Response(content="User deleted successfully", status_code=200)
     
@@ -58,7 +61,7 @@ async def delete_user(id: str):
 @router.get("/{id}")
 async def get_user(id: str):
     try:
-        user = individual_serial(collection.find_one({"_id": ObjectId(id)}))
+        user = individual_serial(user_collection.find_one({"_id": ObjectId(id)}))
 
         return user
     
@@ -69,7 +72,7 @@ async def get_user(id: str):
 @router.delete("/")
 async def delete_all_users():
     try:
-        collection.delete_many({})
+        user_collection.delete_many({})
 
         return Response(content="All users deleted successfully", status_code=200)
     
