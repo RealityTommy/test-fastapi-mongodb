@@ -8,7 +8,7 @@ router = APIRouter(\
     prefix='/todos',\
     tags = ['todos'])
 
-# GET Request Method
+# Get all todos
 @router.get("/")
 async def get_todos():
     try:
@@ -19,7 +19,7 @@ async def get_todos():
     except Exception as e:
         return {"error": str(e)}
 
-# POST Request Method
+# Create a new todo
 @router.post("/")
 async def create_todo(name: str, description: str, completed: bool = False):
     todo = Todo(name=name, description=description, completed=completed)
@@ -32,7 +32,7 @@ async def create_todo(name: str, description: str, completed: bool = False):
     except Exception as e:
         return {"error": str(e)}
 
-# PUT Request Method
+# Update a todo
 @router.put("/{id}")
 async def update_todo(id: str, name: str, description: str, completed: bool):
     todo = Todo(name=name, description=description, completed=completed)
@@ -45,7 +45,7 @@ async def update_todo(id: str, name: str, description: str, completed: bool):
     except Exception as e:
         return {"error": str(e)}
 
-# DELETE Request Method
+# Delete a todo
 @router.delete("/{id}")
 async def delete_todo(id: str):
     try:
@@ -56,7 +56,7 @@ async def delete_todo(id: str):
     except Exception as e:
         return {"error": str(e)}
 
-# GET Request Method
+# Get a todo by id
 @router.get("/{id}")
 async def get_todo(id: str):
     try:
@@ -67,7 +67,7 @@ async def get_todo(id: str):
     except Exception as e:
         return {"error": str(e)}
 
-# DELETE Request Method
+# Delete all todos
 @router.delete("/")
 async def delete_all_todos():
     try:
