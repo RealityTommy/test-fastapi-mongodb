@@ -21,9 +21,7 @@ async def get_todos():
 
 # Create a new todo
 @router.post("/")
-async def create_todo(name: str, description: str, completed: bool = False):
-    todo = Todo(name=name, description=description, completed=completed)
-
+async def create_todo(todo: Todo):
     try:
         collection.insert_one(dict(todo))
 
@@ -34,9 +32,7 @@ async def create_todo(name: str, description: str, completed: bool = False):
 
 # Update a todo
 @router.put("/{id}")
-async def update_todo(id: str, name: str, description: str, completed: bool):
-    todo = Todo(name=name, description=description, completed=completed)
-
+async def update_todo(todo: Todo, id: str):
     try:
         collection.update_one({"_id": ObjectId(id)}, {"$set": dict(todo)})
 
