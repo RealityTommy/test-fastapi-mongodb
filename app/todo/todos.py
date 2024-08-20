@@ -17,7 +17,7 @@ async def get_todos():
         return todos
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
 
 # Create a new todo
 @router.post("/")
@@ -27,10 +27,10 @@ async def create_todo(name: str, description: str, completed: bool = False):
     try:
         collection.insert_one(dict(todo))
 
-        return {"message": "Todo created successfully"}
+        return Response(content="Todo created successfully", status_code=201)
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
 
 # Update a todo
 @router.put("/{id}")
@@ -40,10 +40,10 @@ async def update_todo(id: str, name: str, description: str, completed: bool):
     try:
         collection.update_one({"_id": ObjectId(id)}, {"$set": dict(todo)})
 
-        return {"message": "Todo updated successfully"}
+        return Response(content="Todo updated successfully", status_code=200)
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
 
 # Delete a todo
 @router.delete("/{id}")
@@ -51,10 +51,10 @@ async def delete_todo(id: str):
     try:
         collection.delete_one({"_id": ObjectId(id)})
 
-        return {"message": "Todo deleted successfully"}
+        return Response(content="Todo deleted successfully", status_code=200)
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
 
 # Get a todo by id
 @router.get("/{id}")
@@ -65,7 +65,7 @@ async def get_todo(id: str):
         return todo
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
 
 # Delete all todos
 @router.delete("/")
@@ -73,7 +73,7 @@ async def delete_all_todos():
     try:
         collection.delete_many({})
 
-        return {"message": "All todos deleted successfully"}
+        return Response(content="All todos deleted successfully", status_code=200)
     
     except Exception as e:
-        return {"error": str(e)}
+        return Response(content=str(e), status_code=400)
