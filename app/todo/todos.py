@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Response
-from app.todo.models import Todo
+from app.todo.models import TodoModel as Todo
 from app.todo.database import collection
 from app.todo.schemas import individual_serial, list_serial
 from bson import ObjectId
