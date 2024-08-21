@@ -31,7 +31,7 @@ async def get_todos(token: str):
 
 # Create a new todo
 @router.post("/")
-async def create_todo(todo: Todo, token: str):
+async def create_todo(todo: Todo, token: str, uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -39,7 +39,7 @@ async def create_todo(todo: Todo, token: str):
         # If token is verified, create the todo
         if verify_token:
             # Create the todo
-            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, firebase_uid=verify_token["uid"])
+            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, firebase_uid=uid)
 
             # Insert the todo into the todo collection
             todo_collection.insert_one(dict(new_todo))
