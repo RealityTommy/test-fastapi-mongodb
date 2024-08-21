@@ -58,7 +58,7 @@ async def update_todo(todo: Todo, id: str, token: str):
         if verify_token:
             todo_collection.update_one({"_id": ObjectId(id)}, {"$set": dict(todo)})
 
-        return Response(content="Todo updated successfully", status_code=200)
+            return Response(content="Todo updated successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
@@ -74,7 +74,7 @@ async def delete_todo(id: str, token: str):
         if verify_token:
             todo_collection.delete_one({"_id": ObjectId(id)})
 
-        return Response(content="Todo deleted successfully", status_code=200)
+            return Response(content="Todo deleted successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
@@ -90,7 +90,7 @@ async def get_todo(id: str, token: str):
         if verify_token:
             todo = individual_serial(todo_collection.find_one({"_id": ObjectId(id)}))
 
-        return todo
+            return todo
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
@@ -106,7 +106,7 @@ async def delete_all_todos(token: str):
         if verify_token:
             todo_collection.delete_many({"uid": verify_token["uid"]})
 
-        return Response(content="All todos deleted successfully", status_code=200)
+            return Response(content="All todos deleted successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
