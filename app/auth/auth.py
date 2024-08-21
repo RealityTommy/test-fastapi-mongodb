@@ -29,8 +29,8 @@ router = APIRouter(\
     tags = ["auth"])
 
 # Sign up
-@router.post("/signup")
-async def signup(user_login: EmailPasswordModel, user_data: UserModel):
+@router.post("/signup/emailpassword")
+async def signup_with_email_and_password(user_login: EmailPasswordModel, user_data: UserModel):
     email = user_login.email
     password = user_login.password
 
@@ -48,7 +48,7 @@ async def signup(user_login: EmailPasswordModel, user_data: UserModel):
         raise HTTPException(status_code=400, detail=f"Account already exists for {email}")
 
 # Sign in
-@router.post("/signin")
+@router.post("/signin/emailpassword")
 async def signin(user_login: EmailPasswordModel):
     try:
         user = firebase.auth().sign_in_with_email_and_password(user_login.email, user_login.password)
