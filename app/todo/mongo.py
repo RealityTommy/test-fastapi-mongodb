@@ -15,11 +15,16 @@ router = APIRouter(\
 
 # Get all todos
 @router.get("/")
-async def get_todos():
+async def get_todos(token: str):
     try:
-        todos = list_serial(todo_collection.find())
+        # Verify the token
+        verify_token = await validatetoken(token)
 
-        return todos
+        # If token is verified, get all todos
+        if verify_token:
+            todos = list_serial(todo_collection.find())
+
+            return todos
     
     except Exception as e:
         return Response(content=str(e), status_code=400)

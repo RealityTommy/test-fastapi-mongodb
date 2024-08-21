@@ -67,6 +67,7 @@ async def delete_user(uid: str, token: str):
             user = list_serial(user_collection.find({"firebase_uid": uid}))
 
             if user:
+                # Delete all the user's todos
                 todo_collection.delete_many({"uid": uid})
 
                 # Delete the user
@@ -102,6 +103,7 @@ async def delete_all_users(token: str):
 
         # If token is verified, delete all users
         if verify_token:
+            # Delete all users
             user_collection.delete_many({})
 
             return Response(content="All users deleted successfully", status_code=200)
