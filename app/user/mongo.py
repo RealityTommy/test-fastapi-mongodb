@@ -2,6 +2,7 @@ from fastapi import APIRouter, Response
 from app.user.models import UserModel as User
 from app.user.schemas import individual_serial, list_serial
 from bson import ObjectId
+from firebase_admin import auth
 from app.config.mongo.database import db
 
 user_collection = db["users"]
@@ -46,13 +47,22 @@ async def update_user(user: User, id: str):
 
 # Delete a user
 @router.delete("/{id}")
-async def delete_user(id: str):
+async def delete_user(uid: str, token: str):
     try:
+        # Verify the token
+        decoded_token = auth.verify_id_token(token)
 
+        # If token is verified, delete the user and all todos associated with the user
+        if decoded_token:
+            user = list_serial(user_collection.find({"firebase_uid": uid}))
 
-        user_collection.delete_one({"_id": ObjectId(id)})
+            if user:
+                todo_collection.delete_many({"uid": uid})
 
-        return Response(content="User deleted successfully", status_code=200)
+                # Delete the user
+                user_collection.delete_one({"firebase_uid": uid})
+
+                return Response(content="User deleted successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
