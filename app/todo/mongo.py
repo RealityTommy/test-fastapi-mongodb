@@ -99,14 +99,14 @@ async def get_todo(id: str, token: str):
 
 # Delete all todos
 @router.delete("/")
-async def delete_all_todos(token: str):
+async def delete_all_todos(uid: str, token: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
 
         # If token is verified, delete all todos for the user
         if verify_token:
-            todo_collection.delete_many({"firebase_uid": verify_token["uid"]})
+            todo_collection.delete_many({"firebase_uid": uid})
 
             return Response(content="All todos deleted successfully", status_code=200)
     
