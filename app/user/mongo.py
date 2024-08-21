@@ -2,8 +2,8 @@ from fastapi import APIRouter, Response
 from app.user.models import UserModel as User
 from app.user.schemas import individual_serial, list_serial
 from bson import ObjectId
-from firebase_admin import auth
 from app.config.mongo.database import db
+from app.auth.auth import validatetoken
 
 user_collection = db["users"]
 todo_collection = db["todos"]
@@ -14,11 +14,16 @@ router = APIRouter(\
 
 # Get all users
 @router.get("/")
-async def get_users():
+async def get_users(token: str):
     try:
-        users = list_serial(user_collection.find())
+        # Verify the token
+        verify_token = await validatetoken(token)
 
-        return users
+        # If token is verified, get all users
+        if verify_token:
+            users = list_serial(user_collection.find())
+
+            return users
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
@@ -36,11 +41,16 @@ async def create_user(user: User):
 
 # Update a user
 @router.put("/{id}")
-async def update_user(user: User, id: str):
+async def update_user(token: str, user: User, id: str):
     try:
-        user_collection.update_one({"_id": ObjectId(id)}, {"$set": dict(user)})
+        # Verify the token
+        verify_token = await validatetoken(token)
 
-        return Response(content="User updated successfully", status_code=200)
+        # If token is verified, update the user
+        if verify_token:
+            user_collection.update_one({"_id": ObjectId(id)}, {"$set": dict(user)})
+
+            return Response(content="User updated successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
@@ -50,10 +60,10 @@ async def update_user(user: User, id: str):
 async def delete_user(uid: str, token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
-        # If token is verified, delete the user and all todos associated with the user
-        if decoded_token:
+        # If token is verified, delete the user and all todos
+        if verify_token:
             user = list_serial(user_collection.find({"firebase_uid": uid}))
 
             if user:
@@ -69,22 +79,32 @@ async def delete_user(uid: str, token: str):
 
 # Get a user by id
 @router.get("/{id}")
-async def get_user(id: str):
+async def get_user(token: str, id: str):
     try:
-        user = individual_serial(user_collection.find_one({"_id": ObjectId(id)}))
+        # Verify the token
+        verify_token = await validatetoken(token)
 
-        return user
+        # If token is verified, get the user
+        if verify_token:
+            user = individual_serial(user_collection.find_one({"_id": ObjectId(id)}))
+
+            return user
     
     except Exception as e:
         return Response(content=str(e), status_code=400)
 
 # Delete all users
 @router.delete("/")
-async def delete_all_users():
+async def delete_all_users(token: str):
     try:
-        user_collection.delete_many({})
+        # Verify the token
+        verify_token = await validatetoken(token)
 
-        return Response(content="All users deleted successfully", status_code=200)
+        # If token is verified, delete all users
+        if verify_token:
+            user_collection.delete_many({})
+
+            return Response(content="All users deleted successfully", status_code=200)
     
     except Exception as e:
         return Response(content=str(e), status_code=400)

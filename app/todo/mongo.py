@@ -3,7 +3,7 @@ from app.todo.models import TodoModel as Todo
 from app.todo.schemas import individual_serial, list_serial
 from bson import ObjectId
 from app.config.mongo.database import db
-from firebase_admin import auth
+from app.auth.auth import validatetoken
 
 # MongoDB todo collection
 todo_collection = db["todos"]
@@ -29,12 +29,12 @@ async def get_todos():
 async def create_todo(todo: Todo, token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
-        new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, uid=decoded_token["uid"])
+        # If token is verified, create the todo
+        if verify_token:
+            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, uid=decoded_token["uid"])
 
-        # If token is verified, create a new todo
-        if decoded_token:
             todo_collection.insert_one(dict(new_todo))
 
             return Response(content="Todo created successfully", status_code=201)
@@ -47,10 +47,10 @@ async def create_todo(todo: Todo, token: str):
 async def update_todo(todo: Todo, id: str, token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
         # If token is verified, update the todo
-        if decoded_token:
+        if verify_token:
             todo_collection.update_one({"_id": ObjectId(id)}, {"$set": dict(todo)})
 
         return Response(content="Todo updated successfully", status_code=200)
@@ -63,10 +63,10 @@ async def update_todo(todo: Todo, id: str, token: str):
 async def delete_todo(id: str, token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
         # If token is verified, delete the todo
-        if decoded_token:
+        if verify_token:
             todo_collection.delete_one({"_id": ObjectId(id)})
 
         return Response(content="Todo deleted successfully", status_code=200)
@@ -79,10 +79,10 @@ async def delete_todo(id: str, token: str):
 async def get_todo(id: str, token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
         # If token is verified, get the todo
-        if decoded_token:
+        if verify_token:
             todo = individual_serial(todo_collection.find_one({"_id": ObjectId(id)}))
 
         return todo
@@ -95,11 +95,11 @@ async def get_todo(id: str, token: str):
 async def delete_all_todos(token: str):
     try:
         # Verify the token
-        decoded_token = auth.verify_id_token(token)
+        verify_token = await validatetoken(token)
 
         # If token is verified, delete all todos for the user
-        if decoded_token:
-            todo_collection.delete_many({"uid": decoded_token["uid"]})
+        if verify_token:
+            todo_collection.delete_many({"uid": verify_token["uid"]})
 
         return Response(content="All todos deleted successfully", status_code=200)
     
