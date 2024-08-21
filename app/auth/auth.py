@@ -1,27 +1,16 @@
 from fastapi import APIRouter, Response, HTTPException
 from fastapi.responses import JSONResponse
-import pyrebase
-import firebase_admin
-from firebase_admin import credentials, auth
-from app.config.firebase.config import firebaseConfig
-import json
 from app.auth.models import EmailPasswordModel
 from app.user.models import UserModel
-from app.config.mongo.database import db
-
-# Firebase service account key
-serviceAccountKeyFile = open("app/config/firebase/serviceAccountKey.json")
-serviceAccountKey = json.load(serviceAccountKeyFile)
-
-# Initialize Firebase
-if not firebase_admin._apps:
-    cred = credentials.Certificate(serviceAccountKey)
-    firebase_admin.initialize_app(cred)
-
-firebase = pyrebase.initialize_app(firebaseConfig)
+from app.config.mongo.database import db as mongo_db
+from app.auth.firebase import auth, firebase
+from app.auth.firebase import db as firestore
 
 # MongoDB users collection
-user_collection = db["users"]
+mongo_user_collection = mongo_db["users"]
+
+# Firestore users collection
+firestore_user_collection = firestore.collection("users")
 
 # Auth router
 router = APIRouter(\
@@ -45,7 +34,12 @@ async def signup_with_email_and_password(user_login: EmailPasswordModel, user_da
             # If user is signed in, create user profile
             if signed_in:
                 user_profile = UserModel(first_name=user_data.first_name,last_name=user_data.last_name,firebase_uid=user_account.uid)
-                user_collection.insert_one(dict(user_profile))
+                
+                # Insert user profile into MongoDB
+                mongo_user_collection.insert_one(dict(user_profile))
+                
+                # Insert user profile into Firestore
+                firestore_user_collection.document().set(dict(user_profile))
 
                 return Response(content=f"Sign up successful for {email}", status_code=201)
 

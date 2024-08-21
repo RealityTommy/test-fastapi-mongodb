@@ -14,6 +14,6 @@ class TodoModel(BaseModel):
                 "name": "Name",
                 "description": "Description",
                 "completed": False,
-                "uid": ""
+                "firebase_uid": ""
             }
         }

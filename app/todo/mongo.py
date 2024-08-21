@@ -38,8 +38,10 @@ async def create_todo(todo: Todo, token: str):
 
         # If token is verified, create the todo
         if verify_token:
-            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, uid=decoded_token["uid"])
+            # Create the todo
+            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, firebase_uid=verify_token["uid"])
 
+            # Insert the todo into the todo collection
             todo_collection.insert_one(dict(new_todo))
 
             return Response(content="Todo created successfully", status_code=201)
@@ -104,7 +106,7 @@ async def delete_all_todos(token: str):
 
         # If token is verified, delete all todos for the user
         if verify_token:
-            todo_collection.delete_many({"uid": verify_token["uid"]})
+            todo_collection.delete_many({"firebase_uid": verify_token["uid"]})
 
             return Response(content="All todos deleted successfully", status_code=200)
     

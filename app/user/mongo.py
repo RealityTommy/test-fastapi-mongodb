@@ -28,17 +28,6 @@ async def get_users(token: str):
     except Exception as e:
         return Response(content=str(e), status_code=400)
 
-# Create a new user
-@router.post("/")
-async def create_user(user: User):
-    try:
-        user_collection.insert_one(dict(user))
-
-        return Response(content="User created successfully", status_code=201)
-    
-    except Exception as e:
-        return Response(content=str(e), status_code=400)
-
 # Update a user
 @router.put("/{id}")
 async def update_user(token: str, user: User, id: str):
