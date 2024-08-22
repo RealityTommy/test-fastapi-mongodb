@@ -4,6 +4,7 @@ from app.user.schemas import individual_serial, list_serial
 from bson import ObjectId
 from app.auth.auth import validatetoken
 from app.auth.firebase import db as firestore
+from app.todo.firebase import delete_all_todos
 
 # Firestore users collection
 firestore_user_collection = firestore.collection("users")
@@ -37,7 +38,7 @@ async def get_users(token: str):
 
 # Update a user
 @router.put("/{id}")
-async def update_user(token: str, user: User, id: str):
+async def update_user(token: str, user: User, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -45,7 +46,7 @@ async def update_user(token: str, user: User, id: str):
         # If token is verified, update the user
         if verify_token:
             # Update the user
-            user = firestore_user_collection.document(id).update(dict(user))
+            user = firestore_user_collection.document(firebase_uid).update(dict(user))
 
             return Response(content="User updated successfully", status_code=200)
     
@@ -54,7 +55,7 @@ async def update_user(token: str, user: User, id: str):
 
 # Delete a user
 @router.delete("/{id}")
-async def delete_user(id: str, token: str):
+async def delete_user(token: str, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -62,9 +63,11 @@ async def delete_user(id: str, token: str):
         # If token is verified, delete the user and all todos
         if verify_token:
             # Delete the user's todos
-            firestore_user_collection.document(id).collection("todos").delete()
-            # Delete the user
-            firestore_user_collection.document(id).delete()
+            delete_todos = await delete_all_todos(token, firebase_uid)
+
+            # If delete_todos is successful, delete the user
+            if delete_todos:
+                firestore_user_collection.document(firebase_uid).delete()
 
             return Response(content="User deleted successfully", status_code=200)
     
@@ -73,7 +76,7 @@ async def delete_user(id: str, token: str):
 
 # Get a user by id
 @router.get("/{id}")
-async def get_user(token: str, id: str):
+async def get_user(token: str, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -81,7 +84,7 @@ async def get_user(token: str, id: str):
         # If token is verified, get the user
         if verify_token:
             # Get the user
-            user = firestore_user_collection.document(id).get()
+            user = firestore_user_collection.document(firebase_uid).get()
 
             # If user exists, return user
             if user:

@@ -36,10 +36,10 @@ async def signup_with_email_and_password(user_login: EmailPasswordModel, user_da
                 user_profile = UserModel(first_name=user_data.first_name,last_name=user_data.last_name,firebase_uid=user_account.uid)
                 
                 # Insert user profile into MongoDB
-                mongo_user_collection.insert_one(dict(user_profile))
+                # mongo_user_collection.insert_one(dict(user_profile))
                 
                 # Insert user profile into Firestore
-                firestore_user_collection.document().set(dict(user_profile))
+                firestore_user_collection.document(user_account.uid).set(dict(user_profile))
 
                 return signed_in
 
