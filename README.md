@@ -1,4 +1,4 @@
-# fastapi-mongodb-docker
+# fastapi-mongodb-docker-firebase
 ## Prerequisites
 - [ ] [Python 3.12.5](https://www.python.org/downloads/release/python-3125/)
 - [ ] [Docker](https://www.docker.com/)
@@ -72,10 +72,14 @@ Follow the following steps if you would like to use Firebase for authentication.
 9. In the *General settings* tab, go to the *Your apps* section and select the new web app.
 10. In the *SDK setup and configuration* section, select the "Config" option and copy the dictionary values.
 11. 
-#### Ignore `config.py` and `serviceAccountKey.json`
-After you replace the template information in `config.py` and `serviceAccountKey.json` with the actual values, git will see them as changes. If you are planning on pushing your project to a repo (this one or your own), **DO NOT** push your actual `config.py` or `serviceAccountKey.json` files.
+#### Ignore `.env`, `config.py` and `serviceAccountKey.json`
+After you replace the template information in `.env`, `config.py` and `serviceAccountKey.json` with the actual values, git will see them as changes. If you are planning on pushing your project to a repo (this one or your own), **DO NOT** push your actual `.env`, `config.py` or `serviceAccountKey.json` files.
 
 To have git ignore any changes to those files, using your terminal, navigate to the project directory and do this:
+```
+git update-index --assume-unchanged .env
+```
+
 ```
 git update-index --assume-unchanged app/config/firebase/serviceAccountKey.json
 ```
@@ -85,6 +89,10 @@ git update-index --assume-unchanged app/config/firebase/config.py
 ```
 
 If you do want to track changes on this file again, do this:
+```
+git update-index --no-assume-unchanged .env
+```
+
 ```
 git update-index --no-assume-unchanged app/config/firebase/serviceAccountKey.json
 ```
