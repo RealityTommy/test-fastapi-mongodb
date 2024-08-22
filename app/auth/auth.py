@@ -36,7 +36,7 @@ async def signup_with_email_and_password(user_login: EmailPasswordModel, user_da
                 user_profile = UserModel(first_name=user_data.first_name,last_name=user_data.last_name,firebase_uid=user_account.uid)
                 
                 # Insert user profile into MongoDB
-                # mongo_user_collection.insert_one(dict(user_profile))
+                mongo_user_collection.insert_one(dict(user_profile))
                 
                 # Insert user profile into Firestore
                 firestore_user_collection.document(user_account.uid).set(dict(user_profile))
@@ -70,13 +70,3 @@ async def validatetoken(token: str):
 
     except Exception as e:
         raise HTTPException(detail="Could not validate user", status_code=401)
-
-# Sign out
-@router.post("/signout")
-async def signout():
-    return Response(content="Signout", status_code=200)
-
-# Reset password
-@router.post("/resetpassword")
-async def resetpassword():
-    return Response(content="Reset Password", status_code=200)
