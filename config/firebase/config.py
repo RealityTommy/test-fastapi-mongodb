@@ -6,5 +6,4 @@ firebaseConfig = {
   "messagingSenderId": "SENDER_ID",
   "appId": "APP_ID",
   "measurementId": "MEASUREMENT_ID",
-  "databaseURL": "DATABASE_URL"
 }
