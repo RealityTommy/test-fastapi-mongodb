@@ -3,6 +3,10 @@ from app.todo.models import TodoModel as Todo
 from app.todo.schemas import individual_serial, list_serial
 from bson import ObjectId
 from app.auth.auth import validatetoken
+from app.auth.firebase import db as firestore
+
+# Firestore users collection
+firestore_user_collection = firestore.collection("users")
 
 # Todo router
 router = APIRouter(\
@@ -11,15 +15,19 @@ router = APIRouter(\
 
 # Get all todos
 @router.get("/")
-async def get_todos(token: str):
+async def get_todos(token: str, id: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
 
         # If token is verified, create the todo
         if verify_token:
-            # TODO: Get all todos from Firebase
-            todos = list_serial()
+            # Get all todos
+            todos = []
+
+            # Iterate through firestore user's todos collection and append to todos list
+            for doc in firestore_user_collection.document(id).collection("todos").stream():
+                todos.append(doc.to_dict())
 
             return todos
     
@@ -28,16 +36,21 @@ async def get_todos(token: str):
 
 # Create a new todo
 @router.post("/")
-async def create_todo(todo: Todo, token: str):
+async def create_todo(todo: Todo, token: str, uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
 
         # If token is verified, create the todo
         if verify_token:
-            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, uid=decoded_token["uid"])
+            # Create the todo
+            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, firebase_uid=uid)
 
-            # TODO: Create a new todo in Firebase
+            # Get the user's todos collection
+            user_todos = firestore_user_collection.document(id).collection("todos")
+
+            # Insert the todo into the user's todos collection
+            user_todos.document().set(dict(new_todo))
 
             return Response(content="Todo created successfully", status_code=201)
 

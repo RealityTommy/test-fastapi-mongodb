@@ -15,14 +15,14 @@ router = APIRouter(\
 
 # Get all todos
 @router.get("/")
-async def get_todos(token: str):
+async def get_todos(token: str, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
 
         # If token is verified, get all todos
         if verify_token:
-            todos = list_serial(todo_collection.find())
+            todos = list_serial(todo_collection.find({"firebase_uid": firebase_uid}))
 
             return todos
     
@@ -31,7 +31,7 @@ async def get_todos(token: str):
 
 # Create a new todo
 @router.post("/")
-async def create_todo(todo: Todo, token: str, uid: str):
+async def create_todo(token: str, todo: Todo, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -39,7 +39,12 @@ async def create_todo(todo: Todo, token: str, uid: str):
         # If token is verified, create the todo
         if verify_token:
             # Create the todo
-            new_todo = Todo(name=todo.name, description=todo.description, completed=todo.completed, firebase_uid=uid)
+            new_todo = Todo(\
+                name = todo.name,\
+                description = todo.description,\
+                completed = todo.completed,\
+                firebase_uid = firebase_uid\
+            )
 
             # Insert the todo into the todo collection
             todo_collection.insert_one(dict(new_todo))
@@ -51,7 +56,7 @@ async def create_todo(todo: Todo, token: str, uid: str):
 
 # Update a todo
 @router.put("/{id}")
-async def update_todo(todo: Todo, id: str, token: str):
+async def update_todo(token: str, todo: Todo, id: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -67,7 +72,7 @@ async def update_todo(todo: Todo, id: str, token: str):
 
 # Delete a todo
 @router.delete("/{id}")
-async def delete_todo(id: str, token: str):
+async def delete_todo(token: str, id: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -83,7 +88,7 @@ async def delete_todo(id: str, token: str):
 
 # Get a todo by id
 @router.get("/{id}")
-async def get_todo(id: str, token: str):
+async def get_todo(token: str, id: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
@@ -97,16 +102,16 @@ async def get_todo(id: str, token: str):
     except Exception as e:
         return Response(content=str(e), status_code=400)
 
-# Delete all todos
+# Delete all todos for a user
 @router.delete("/")
-async def delete_all_todos(uid: str, token: str):
+async def delete_all_todos(token: str, firebase_uid: str):
     try:
         # Verify the token
         verify_token = await validatetoken(token)
 
         # If token is verified, delete all todos for the user
         if verify_token:
-            todo_collection.delete_many({"firebase_uid": uid})
+            todo_collection.delete_many({"firebase_uid": firebase_uid})
 
             return Response(content="All todos deleted successfully", status_code=200)
     

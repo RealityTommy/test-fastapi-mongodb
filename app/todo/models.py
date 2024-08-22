@@ -5,7 +5,7 @@ class TodoModel(BaseModel):
     name: str
     description: str
     completed: bool
-    uid: str
+    firebase_uid: str
 
     # Add an example to the JSON schema
     class Config:

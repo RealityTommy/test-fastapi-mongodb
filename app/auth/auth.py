@@ -41,7 +41,7 @@ async def signup_with_email_and_password(user_login: EmailPasswordModel, user_da
                 # Insert user profile into Firestore
                 firestore_user_collection.document().set(dict(user_profile))
 
-                return Response(content=f"Sign up successful for {email}", status_code=201)
+                return signed_in
 
     except auth.EmailAlreadyExistsError:
         raise HTTPException(status_code=400, detail=f"Account already exists for {email}")
